@@ -10,7 +10,7 @@ const double GRAVITY_CONSTANT = 9.8;
 const double MAX_TORBULANT_EFFECT = 0.4;
 const float AIR_DENSITY = 1.2;
 
-float norm(irrvec3 vec) {
+float norm(raylib::Vector3 vec) {
   return std::sqrt(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z);
 }
 
@@ -22,7 +22,7 @@ BaseHeli::BaseHeli(const HeliParams &params)
       m_pitch_servo(4, 0), m_roll_servo(4, 0), m_yaw_servo(8, 0),
       m_lift_servo(4, 0), m_throttle_servo(0.5, -0.9), m_params(params) {
   m_pos = m_params.init_pos;
-  m_v = irrvec3(0, 0, 0);
+  m_v = raylib::Vector3(0, 0, 0);
   m_rotor_rotation.setRotationDegrees(m_params.init_rotation);
   m_main_rotor_vel = 0;
 }
@@ -44,7 +44,7 @@ void print_matrix(const std::string str, const irr::core::matrix4 &mat) {
   std::cout << mat(2, 2) << std::endl;
 }
 
-void print_vec(const std::string str, const irrvec3 &vec) {
+void print_vec(const std::string str, const raylib::Vector3 &vec) {
   std::cout << "Vec " << str << ": (";
   std::cout << vec.X << ", ";
   std::cout << vec.Y << ", ";
@@ -52,8 +52,8 @@ void print_vec(const std::string str, const irrvec3 &vec) {
 }
 
 void BaseHeli::update_body_moments(float time_delta,
-                                   const irrvec3 &moment_in_world) {
-  irrvec3 moment_in_body;
+                                   const raylib::Vector3 &moment_in_world) {
+  raylib::Vector3 moment_in_body;
   m_body_rotation.getTransposed().rotateVect(moment_in_body, moment_in_world);
 
   // Update body angular velocity according to Eurler's equation.
@@ -65,13 +65,13 @@ void BaseHeli::update_body_moments(float time_delta,
       m_params.body_moment_of_inertia;
 
   // Get the angularv in world coordinates.
-  irrvec3 body_angularv;
+  raylib::Vector3 body_angularv;
   m_body_rotation.rotateVect(body_angularv, m_body_angularv_in_body_coords);
   update_rotation_matrix(m_body_rotation, body_angularv * time_delta);
 }
 
 void BaseHeli::update_rotor_moments(float time_delta,
-                                    const irrvec3 &moment_in_world) {
+                                    const raylib::Vector3 &moment_in_world) {
   float main_rotor_effectiveness =
       m_main_rotor_vel / 360 / m_params.main_rotor_max_vel;
   // Update rotor angular momentum by the torques.
@@ -79,10 +79,10 @@ void BaseHeli::update_rotor_moments(float time_delta,
 
   // Update back the rotor rotation matrix:
   // The Y vector is taken to point towards the angular momentun.
-  irrvec3 rot_y = m_rotor_angular_momentum_in_world;
+  raylib::Vector3 rot_y = m_rotor_angular_momentum_in_world;
   rot_y.normalize();
-  irrvec3 body_y(m_body_rotation(1, 0), m_body_rotation(1, 1),
-                 m_body_rotation(1, 2));
+  raylib::Vector3 body_y(m_body_rotation(1, 0), m_body_rotation(1, 1),
+                         m_body_rotation(1, 2));
   // Tackle numerical instability in low RPMs - since in low RPMs the torques
   // on the rotor can change its orientation quite a bit, this causes a lot
   // of numerical instability.
@@ -93,15 +93,15 @@ void BaseHeli::update_rotor_moments(float time_delta,
   // Only at the first frame, the angular_momentum is 0 and it screws up
   // everything. This is a dirty workaround this.
   if (rot_y.X == 0 && rot_y.Y == 0 && rot_y.Z == 0) {
-    rot_y = irrvec3(0, 1, 0);
+    rot_y = raylib::Vector3(0, 1, 0);
   }
 
   // The Z (pointing towards tail) is taken from the body.
-  irrvec3 rot_z(m_body_rotation(2, 0), m_body_rotation(2, 1),
-                m_body_rotation(2, 2));
+  raylib::Vector3 rot_z(m_body_rotation(2, 0), m_body_rotation(2, 1),
+                        m_body_rotation(2, 2));
 
   // The rest are updated.
-  irrvec3 rot_x = rot_y.crossProduct(rot_z).normalize();
+  raylib::Vector3 rot_x = rot_y.crossProduct(rot_z).normalize();
   rot_z = rot_x.crossProduct(rot_y).normalize();
 
   // update the angular velocity according to the angular momentum.
@@ -122,25 +122,25 @@ void BaseHeli::update_rotor_moments(float time_delta,
   m_rotor_rotation(2, 2) = rot_z.Z;
 }
 
-irrvec3 BaseHeli::calc_body_rotor_reaction_moment(float time_delta) {
+raylib::Vector3 BaseHeli::calc_body_rotor_reaction_moment(float time_delta) {
 
   // Calculate the body reaction moment.
-  irrvec3 body_up(m_body_rotation(1, 0), m_body_rotation(1, 1),
-                  m_body_rotation(1, 2));
-  irrvec3 rotor_up(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
-                   m_rotor_rotation(1, 2));
-  irrvec3 body_reaction_moment_in_world =
+  raylib::Vector3 body_up(m_body_rotation(1, 0), m_body_rotation(1, 1),
+                          m_body_rotation(1, 2));
+  raylib::Vector3 rotor_up(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
+                           m_rotor_rotation(1, 2));
+  raylib::Vector3 body_reaction_moment_in_world =
       rotor_up.crossProduct(body_up) * m_params.rigidness;
 
-  irrvec3 body_reaction_moment;
+  raylib::Vector3 body_reaction_moment;
   m_rotor_rotation.getTransposed().rotateVect(body_reaction_moment,
                                               body_reaction_moment_in_world);
 
   // Anti-wobliness moment.
-  irrvec3 dbody_reaction_moment =
+  raylib::Vector3 dbody_reaction_moment =
       (body_reaction_moment - m_prev_reaction_in_body) / time_delta;
   m_prev_reaction_in_body = body_reaction_moment;
-  irrvec3 anti_wobliness_in_world;
+  raylib::Vector3 anti_wobliness_in_world;
   m_rotor_rotation.rotateVect(anti_wobliness_in_world, dbody_reaction_moment);
   body_reaction_moment_in_world +=
       anti_wobliness_in_world * m_params.anti_wobliness;
@@ -148,31 +148,32 @@ irrvec3 BaseHeli::calc_body_rotor_reaction_moment(float time_delta) {
   return body_reaction_moment_in_world;
 }
 
-void BaseHeli::calc_tail_rotor_force(const irrvec3 &wind_speed,
-                                     irrvec3 &out_force_in_world,
-                                     irrvec3 &out_torque_in_world) {
+void BaseHeli::calc_tail_rotor_force(const raylib::Vector3 &wind_speed,
+                                     raylib::Vector3 &out_force_in_world,
+                                     raylib::Vector3 &out_torque_in_world) {
   float main_rotor_effectiveness =
       m_main_rotor_vel / 360 / m_params.main_rotor_max_vel;
 
-  irrvec3 tail_torque_in_rotor_coords(
+  raylib::Vector3 tail_torque_in_rotor_coords(
       0,
       m_yaw_servo.get() * m_params.tail_rotor_max_force * m_params.tail_length,
       0);
   tail_torque_in_rotor_coords *= main_rotor_effectiveness;
   float tail_rotor_force_magnitude =
       tail_torque_in_rotor_coords.Y / m_params.tail_length;
-  irrvec3 heli_right(m_rotor_rotation(0, 0), m_rotor_rotation(0, 1),
-                     m_rotor_rotation(0, 2));
-  irrvec3 tail_rotor_force_in_world = tail_rotor_force_magnitude * heli_right;
+  raylib::Vector3 heli_right(m_rotor_rotation(0, 0), m_rotor_rotation(0, 1),
+                             m_rotor_rotation(0, 2));
+  raylib::Vector3 tail_rotor_force_in_world =
+      tail_rotor_force_magnitude * heli_right;
 
-  irrvec3 tail_torque_in_world;
+  raylib::Vector3 tail_torque_in_world;
   m_body_rotation.rotateVect(tail_torque_in_world, tail_torque_in_rotor_coords);
 
   out_force_in_world = tail_rotor_force_in_world;
   out_torque_in_world = tail_torque_in_world;
 }
 
-irrvec3 BaseHeli::calc_engine_torque() {
+raylib::Vector3 BaseHeli::calc_engine_torque() {
   float main_rotor_effectiveness =
       m_main_rotor_vel / 360 / m_params.main_rotor_max_vel;
 
@@ -198,29 +199,30 @@ irrvec3 BaseHeli::calc_engine_torque() {
   float motor_drag_torque = -sign(m_main_rotor_vel) * max_motor_drag_torque;
   main_rotor_torque += motor_drag_torque;
 
-  irrvec3 rotor_y(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
-                  m_rotor_rotation(1, 2));
+  raylib::Vector3 rotor_y(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
+                          m_rotor_rotation(1, 2));
   return main_rotor_torque * rotor_y;
 }
 
-irrvec3 BaseHeli::calc_swash_torque() {
+raylib::Vector3 BaseHeli::calc_swash_torque() {
   float main_rotor_effectiveness =
       m_main_rotor_vel / 360 / m_params.main_rotor_max_vel;
 
   // Note that the roll and pitch are switched due to the gyro 90 deg effect.
-  irrvec3 swash_torque_in_rotor_coords(
+  raylib::Vector3 swash_torque_in_rotor_coords(
       -m_roll_servo.get() * m_params.swash_torque, 0,
       m_pitch_servo.get() * m_params.swash_torque);
   swash_torque_in_rotor_coords *= main_rotor_effectiveness;
-  irrvec3 swash_torque_in_world;
+  raylib::Vector3 swash_torque_in_world;
   m_rotor_rotation.rotateVect(swash_torque_in_world,
                               swash_torque_in_rotor_coords);
   return swash_torque_in_world;
 }
 
-irrvec3 BaseHeli::torbulant_force(const irrvec3 &pos_in_world,
-                                  const irrvec3 &airspeed_in_world,
-                                  const irrvec3 &lift_in_world) {
+raylib::Vector3
+BaseHeli::torbulant_force(const raylib::Vector3 &pos_in_world,
+                          const raylib::Vector3 &airspeed_in_world,
+                          const raylib::Vector3 &lift_in_world) {
   // Each torbulant point has a target velocity in which the torbulant effect
   // start effcting. On points that get fresh air should have half of the
   // of the velocity.
@@ -240,30 +242,32 @@ irrvec3 BaseHeli::torbulant_force(const irrvec3 &pos_in_world,
   return -MAX_TORBULANT_EFFECT * lift_in_world * torbulant_coeff / 4;
 }
 
-void BaseHeli::update_torbulation(float time_delta,
-                                  const irrvec3 &lift_in_world,
-                                  const irrvec3 &wind_speed,
-                                  irrvec3 &out_torbulant_force_in_world,
-                                  irrvec3 &out_torbulant_torque_in_world) {
-  irrvec3 airspeed_in_world = -(m_v - wind_speed);
+void BaseHeli::update_torbulation(
+    float time_delta, const raylib::Vector3 &lift_in_world,
+    const raylib::Vector3 &wind_speed,
+    raylib::Vector3 &out_torbulant_force_in_world,
+    raylib::Vector3 &out_torbulant_torque_in_world) {
+  raylib::Vector3 airspeed_in_world = -(m_v - wind_speed);
 
-  irrvec3 front = irrvec3(m_rotor_rotation(2, 0), m_rotor_rotation(2, 1),
-                          m_rotor_rotation(2, 2)) *
-                  m_params.main_rotor_length / 2;
-  irrvec3 right = irrvec3(m_rotor_rotation(0, 0), m_rotor_rotation(0, 1),
-                          m_rotor_rotation(0, 2)) *
-                  m_params.main_rotor_length / 2;
+  raylib::Vector3 front =
+      raylib::Vector3(m_rotor_rotation(2, 0), m_rotor_rotation(2, 1),
+                      m_rotor_rotation(2, 2)) *
+      m_params.main_rotor_length / 2;
+  raylib::Vector3 right =
+      raylib::Vector3(m_rotor_rotation(0, 0), m_rotor_rotation(0, 1),
+                      m_rotor_rotation(0, 2)) *
+      m_params.main_rotor_length / 2;
 
-  irrvec3 front_torbulation_force =
+  raylib::Vector3 front_torbulation_force =
       torbulant_force(front, airspeed_in_world, lift_in_world) *
       (0.75 + 0.25 * m_torbulant_rand_front.update(time_delta));
-  irrvec3 back_torbulation_force =
+  raylib::Vector3 back_torbulation_force =
       torbulant_force(-front, airspeed_in_world, lift_in_world) *
       (0.75 + 0.25 * m_torbulant_rand_back.update(time_delta));
-  irrvec3 right_torbulation_force =
+  raylib::Vector3 right_torbulation_force =
       torbulant_force(right, airspeed_in_world, lift_in_world) *
       (0.75 + 0.25 * m_torbulant_rand_right.update(time_delta));
-  irrvec3 left_torbulation_force =
+  raylib::Vector3 left_torbulation_force =
       torbulant_force(-right, airspeed_in_world, lift_in_world) *
       (0.75 + 0.25 * m_torbulant_rand_left.update(time_delta));
   out_torbulant_force_in_world =
@@ -275,30 +279,30 @@ void BaseHeli::update_torbulation(float time_delta,
                                   left_torbulation_force.crossProduct(-right);
 }
 
-void BaseHeli::calc_aerodynamic_drag(const irrvec3 &wind_speed,
-                                     irrvec3 &out_force_in_world,
-                                     irrvec3 &out_torque_in_world) {
-  irrvec3 airspeed_in_world = -(m_v - wind_speed);
+void BaseHeli::calc_aerodynamic_drag(const raylib::Vector3 &wind_speed,
+                                     raylib::Vector3 &out_force_in_world,
+                                     raylib::Vector3 &out_torque_in_world) {
+  raylib::Vector3 airspeed_in_world = -(m_v - wind_speed);
 
   // Calculate the drag force.
-  irrvec3 drag_vec = m_params.drag;
+  raylib::Vector3 drag_vec = m_params.drag;
   irr::core::matrix4 world_to_heli = m_rotor_rotation.getTransposed();
-  irrvec3 airspeed_in_heli;
+  raylib::Vector3 airspeed_in_heli;
   world_to_heli.rotateVect(airspeed_in_heli,
                            airspeed_in_world); // In heli coord system.
-  irrvec3 aerodynamic_drag_force = drag_vec * airspeed_in_heli;
+  raylib::Vector3 aerodynamic_drag_force = drag_vec * airspeed_in_heli;
   m_rotor_rotation.rotateVect(
       aerodynamic_drag_force); // Back in world coord system.
 
   // calculate the tail-drag torque.
-  irrvec3 heli_right_in_world(m_body_rotation(0, 0), m_body_rotation(0, 1),
-                              m_body_rotation(0, 2));
+  raylib::Vector3 heli_right_in_world(
+      m_body_rotation(0, 0), m_body_rotation(0, 1), m_body_rotation(0, 2));
   float tail_wind = heli_right_in_world.dotProduct(airspeed_in_world);
   tail_wind += m_body_angularv_in_body_coords.Y * m_params.tail_length;
   float tail_drag_moment_y =
       -tail_wind * m_params.tail_drag * m_params.tail_length;
-  irrvec3 aerodynamic_drag_torque(0, tail_drag_moment_y, 0);
-  irrvec3 total_tail_torque_in_world;
+  raylib::Vector3 aerodynamic_drag_torque(0, tail_drag_moment_y, 0);
+  raylib::Vector3 total_tail_torque_in_world;
   m_body_rotation.rotateVect(total_tail_torque_in_world,
                              aerodynamic_drag_torque);
 
@@ -307,33 +311,36 @@ void BaseHeli::calc_aerodynamic_drag(const irrvec3 &wind_speed,
   out_torque_in_world = -aerodynamic_drag_torque;
 }
 
-irrvec3 BaseHeli::calc_dissimetry_of_lift(const irrvec3 &wind_speed,
-                                          float lift_magnitude) {
-  irrvec3 airspeed_in_world = -(m_v - wind_speed);
+raylib::Vector3
+BaseHeli::calc_dissimetry_of_lift(const raylib::Vector3 &wind_speed,
+                                  float lift_magnitude) {
+  raylib::Vector3 airspeed_in_world = -(m_v - wind_speed);
   float rotor_radius = m_params.main_rotor_length / 2.;
   float rotor_omega = m_main_rotor_vel / 360 * 2 * PI;
   float max_airspeed = rotor_omega * rotor_radius * 0.8 + 0.0001;
 
-  irrvec3 rotor_up(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
-                   m_rotor_rotation(1, 2));
-  irrvec3 transient_flow =
+  raylib::Vector3 rotor_up(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
+                           m_rotor_rotation(1, 2));
+  raylib::Vector3 transient_flow =
       airspeed_in_world - rotor_up * airspeed_in_world.dotProduct(rotor_up);
   float effect_magnitude = norm(transient_flow) / max_airspeed;
 
-  irrvec3 dol_direction = transient_flow / (norm(transient_flow) + 0.0001);
+  raylib::Vector3 dol_direction =
+      transient_flow / (norm(transient_flow) + 0.0001);
 
   return dol_direction * effect_magnitude * lift_magnitude * rotor_radius * 0.9;
 }
 
 // The lift forces and engine torques.
-void BaseHeli::calc_lift_force(float time_delta, const irrvec3 &wind_speed,
-                               irrvec3 &out_force_in_world,
-                               irrvec3 &out_rotor_torque_in_world) {
-  irrvec3 rotor_up(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
-                   m_rotor_rotation(1, 2));
+void BaseHeli::calc_lift_force(float time_delta,
+                               const raylib::Vector3 &wind_speed,
+                               raylib::Vector3 &out_force_in_world,
+                               raylib::Vector3 &out_rotor_torque_in_world) {
+  raylib::Vector3 rotor_up(m_rotor_rotation(1, 0), m_rotor_rotation(1, 1),
+                           m_rotor_rotation(1, 2));
 
   // Calc the rotor inflow.
-  irrvec3 airspeed_in_world = -(m_v - wind_speed);
+  raylib::Vector3 airspeed_in_world = -(m_v - wind_speed);
   float rotor_inflow_velocity = -rotor_up.dotProduct(airspeed_in_world);
   float rotor_radius = m_params.main_rotor_length / 2.;
 
@@ -355,15 +362,15 @@ void BaseHeli::calc_lift_force(float time_delta, const irrvec3 &wind_speed,
   float rotor_lift_force_magnitude =
       std::abs(rotor_mass_flow) *
       (rotor_outflow_velocity - rotor_inflow_velocity);
-  irrvec3 lift = rotor_up * rotor_lift_force_magnitude;
+  raylib::Vector3 lift = rotor_up * rotor_lift_force_magnitude;
 
   // Account for torbulation force and torque.
-  irrvec3 torbulant_force_in_world, torbulant_torque_in_world;
+  raylib::Vector3 torbulant_force_in_world, torbulant_torque_in_world;
   update_torbulation(time_delta, lift, wind_speed, torbulant_force_in_world,
                      torbulant_torque_in_world);
 
   // Calculate the rotor drag force, trying to slow down the rotor.
-  irrvec3 rotor_drag_torque =
+  raylib::Vector3 rotor_drag_torque =
       -(lift + torbulant_force_in_world).dotProduct(rotor_up) *
       m_params.main_rotor_length /
       3 // Geometric coeffcient from rotor lift to drag torque.
@@ -371,7 +378,7 @@ void BaseHeli::calc_lift_force(float time_delta, const irrvec3 &wind_speed,
       * rotor_up;                       // Directed upwards.
 
   // Account for Dissimetry of Lift.
-  irrvec3 dissimetry_of_lift_torque =
+  raylib::Vector3 dissimetry_of_lift_torque =
       calc_dissimetry_of_lift(wind_speed, rotor_lift_force_magnitude);
 
   // Ground effect force.
@@ -401,45 +408,45 @@ ServoFilter &BaseHeli::get_servo(int channel) {
   }
 }
 
-void BaseHeli::update(double time_delta, const irrvec3 &wind_speed) {
+void BaseHeli::update(double time_delta, const raylib::Vector3 &wind_speed) {
 
   // Engine torque.
-  irrvec3 engine_torque_in_world = calc_engine_torque();
+  raylib::Vector3 engine_torque_in_world = calc_engine_torque();
 
   // Swash torques.
-  irrvec3 swash_torque_in_world = calc_swash_torque();
+  raylib::Vector3 swash_torque_in_world = calc_swash_torque();
 
   // Tail torque and thrust force.
-  irrvec3 total_tail_torque_in_world, tail_rotor_force_in_world;
+  raylib::Vector3 total_tail_torque_in_world, tail_rotor_force_in_world;
   calc_tail_rotor_force(wind_speed, tail_rotor_force_in_world,
                         total_tail_torque_in_world);
 
   // The body-rotor reaction forces.
-  irrvec3 body_reaction_moment_in_world =
+  raylib::Vector3 body_reaction_moment_in_world =
       calc_body_rotor_reaction_moment(time_delta);
 
   // Gravity force.
-  irrvec3 gravity(0, -GRAVITY_CONSTANT * m_params.mass, 0);
+  raylib::Vector3 gravity(0, -GRAVITY_CONSTANT * m_params.mass, 0);
 
   // Aerodynamic drag force and torque.
-  irrvec3 aerodynamic_drag_force, aerodynamic_drag_torque;
+  raylib::Vector3 aerodynamic_drag_force, aerodynamic_drag_torque;
   calc_aerodynamic_drag(wind_speed, aerodynamic_drag_force,
                         aerodynamic_drag_torque);
 
   // Lift force.
-  irrvec3 lift_force, rotor_lift_torque;
+  raylib::Vector3 lift_force, rotor_lift_torque;
   calc_lift_force(time_delta, wind_speed, lift_force, rotor_lift_torque);
 
   // Limit the external torque.
-  irrvec3 external_torque = m_external_torque;
+  raylib::Vector3 external_torque = m_external_torque;
   if (norm(external_torque) > m_params.external_torque_limit) {
     external_torque /= norm(external_torque) / m_params.external_torque_limit;
   }
 
   // Update pos/speed.
-  irrvec3 total_force = gravity + lift_force - aerodynamic_drag_force -
-                        tail_rotor_force_in_world + m_external_force;
-  irrvec3 acc = total_force / m_params.mass;
+  raylib::Vector3 total_force = gravity + lift_force - aerodynamic_drag_force -
+                                tail_rotor_force_in_world + m_external_force;
+  raylib::Vector3 acc = total_force / m_params.mass;
   m_v += time_delta * acc;
   m_pos += time_delta * m_v;
 
@@ -456,12 +463,13 @@ void BaseHeli::update(double time_delta, const irrvec3 &wind_speed) {
   update_ui(time_delta);
 }
 
-static irrvec3 rotate(irr::core::matrix4 matrix, irrvec3 vec) {
+static raylib::Vector3 rotate(irr::core::matrix4 matrix, raylib::Vector3 vec) {
   matrix.rotateVect(vec);
   return vec;
 }
 
-void BaseHeli::add_force(unsigned int touchpoint_index, const irrvec3 &force) {
+void BaseHeli::add_force(unsigned int touchpoint_index,
+                         const raylib::Vector3 &force) {
   m_external_force += force;
   m_external_torque +=
       rotate(m_body_rotation, m_params.touchpoints_in_heli[touchpoint_index])
@@ -495,11 +503,11 @@ public:
   MainRotorBlur(irr::scene::ISceneManager *smgr,
                 irr::scene::IMeshSceneNode *parent) {
     init_ui(smgr,
-            3.75,                      // radius.
-            irrvec3(-0.0, 1.8 / 4, 0), // position.
-            irrvec3(0, 0, 0),          // rotation.
-            0.03,                      // thichkess.
-            parent                     // parent_node
+            3.75,                              // radius.
+            raylib::Vector3(-0.0, 1.8 / 4, 0), // position.
+            raylib::Vector3(0, 0, 0),          // rotation.
+            0.03,                              // thichkess.
+            parent                             // parent_node
     );
   }
 
@@ -524,11 +532,11 @@ public:
   FlybarBlur(irr::scene::ISceneManager *smgr,
              irr::scene::IMeshSceneNode *parent) {
     init_ui(smgr,
-            0.62,                // radius.
-            irrvec3(0, 0.57, 0), // position.
-            irrvec3(0, 0, 0),    // rotation.
-            0.03,                // thichkess.
-            parent               // parent_node
+            0.62,                        // radius.
+            raylib::Vector3(0, 0.57, 0), // position.
+            raylib::Vector3(0, 0, 0),    // rotation.
+            0.03,                        // thichkess.
+            parent                       // parent_node
     );
   }
 
@@ -551,11 +559,11 @@ public:
   TailRotorBlur(irr::scene::ISceneManager *smgr,
                 irr::scene::IMeshSceneNode *parent) {
     init_ui(smgr,
-            0.66,                        // radius.
-            irrvec3(-4.62, 1.54, -0.14), // position.
-            irrvec3(90, 0, 0),           // rotation.
-            0.03,                        // thichkess.
-            parent                       // parent_node
+            0.66,                                // radius.
+            raylib::Vector3(-4.62, 1.54, -0.14), // position.
+            raylib::Vector3(90, 0, 0),           // rotation.
+            0.03,                                // thichkess.
+            parent                               // parent_node
     );
   }
 
@@ -569,10 +577,10 @@ private:
 };
 
 const struct HeliParams RC_BELL_AERODYNAMICS = {
-    .init_pos = irrvec3(0, 0.13 + -0.019, 0),
-    .init_rotation = irrvec3(0, 0, 0),
+    .init_pos = raylib::Vector3(0, 0.13 + -0.019, 0),
+    .init_rotation = raylib::Vector3(0, 0, 0),
     .mass = 2.,
-    .drag = irrvec3(1, 0.6, 0.2),
+    .drag = raylib::Vector3(1, 0.6, 0.2),
     .torbulant_airspeed = 7,
     .main_rotor_max_vel = 35,
     .main_rotor_torque = 8.,
@@ -586,7 +594,7 @@ const struct HeliParams RC_BELL_AERODYNAMICS = {
 
     .swash_torque = 4 * 10,                       // ~= Mass * G * 1M
     .rotor_moment_of_inertia = 1. / 12 * 0.3 * 1, //  = Rod: 1/12 * M * L^2
-    .body_moment_of_inertia = irrvec3(
+    .body_moment_of_inertia = raylib::Vector3(
         // pitch: 2 masses - one in the rotor and one in the body.
         (0.2 * 0.5 * 0.5) + 1.5 * 0.15 * 0.15,
         // yaw: 2 masses - one in the tail and one close.
@@ -597,12 +605,16 @@ const struct HeliParams RC_BELL_AERODYNAMICS = {
     .rigidness = 20,
     .anti_wobliness = 1. / 16,
 
-    .touchpoints_in_heli = std::vector<irrvec3>(
-        {irrvec3(0.19 * (5. / 6.), -0.128 * (5. / 6.), 0.17 * (5. / 6.)),
-         irrvec3(-0.19 * (5. / 6.), -0.128 * (5. / 6.), 0.17 * (5. / 6.)),
-         irrvec3(-0.19 * (5. / 6.), -0.128 * (5. / 6.), -0.28 * (5. / 6.)),
-         irrvec3(0.19 * (5. / 6.), -0.128 * (5. / 6.), -0.28 * (5. / 6.)),
-         irrvec3(0, 0.05, -1.12 * (5. / 6.))}),
+    .touchpoints_in_heli = std::vector<raylib::Vector3>(
+        {raylib::Vector3(0.19 * (5. / 6.), -0.128 * (5. / 6.),
+                         0.17 * (5. / 6.)),
+         raylib::Vector3(-0.19 * (5. / 6.), -0.128 * (5. / 6.),
+                         0.17 * (5. / 6.)),
+         raylib::Vector3(-0.19 * (5. / 6.), -0.128 * (5. / 6.),
+                         -0.28 * (5. / 6.)),
+         raylib::Vector3(0.19 * (5. / 6.), -0.128 * (5. / 6.),
+                         -0.28 * (5. / 6.)),
+         raylib::Vector3(0, 0.05, -1.12 * (5. / 6.))}),
 
     .external_torque_limit = 1};
 
@@ -613,7 +625,7 @@ RcBellHeli::RcBellHeli(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *heli_mesh =
       smgr->getMesh("media/Bell/source/bell_body.obj");
   m_body_node = smgr->addMeshSceneNode(heli_mesh);
-  m_body_node->setScale(irrvec3(1. / 5, 1. / 5, 1. / 5));
+  m_body_node->setScale(raylib::Vector3(1. / 5, 1. / 5, 1. / 5));
   m_body_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_body_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
   m_body_node->setDebugDataVisible(irr::scene::EDS_OFF);
@@ -628,7 +640,7 @@ RcBellHeli::RcBellHeli(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *main_rotor_mesh =
       smgr->getMesh("media/Bell/source/bell_main_rotor.obj");
   irr::core::matrix4 main_rotor_translation;
-  main_rotor_translation.setTranslation(irrvec3(0.45, -1.4, 0));
+  main_rotor_translation.setTranslation(raylib::Vector3(0.45, -1.4, 0));
   smgr->getMeshManipulator()->apply(
       irr::scene::SVertexPositionTransformManipulator(main_rotor_translation),
       main_rotor_mesh);
@@ -647,7 +659,7 @@ RcBellHeli::RcBellHeli(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *tail_rotor_mesh =
       smgr->getMesh("media/Bell/source/bell_tail_rotor.obj");
   irr::core::matrix4 tail_rotor_translation;
-  tail_rotor_translation.setTranslation(irrvec3(4.62, -1.54, 0));
+  tail_rotor_translation.setTranslation(raylib::Vector3(4.62, -1.54, 0));
   smgr->getMeshManipulator()->apply(
       irr::scene::SVertexPositionTransformManipulator(tail_rotor_translation),
       tail_rotor_mesh);
@@ -662,7 +674,7 @@ RcBellHeli::RcBellHeli(irr::scene::ISceneManager *smgr,
     m_tail_rotor_node->getMaterial(i).AmbientColor.set(255, 255, 255, 255);
   }
 
-  m_shape_rotation.setRotationDegrees(irrvec3(0, -90, 0));
+  m_shape_rotation.setRotationDegrees(raylib::Vector3(0, -90, 0));
 
   m_main_rotor_blur = std::make_shared<MainRotorBlur>(smgr, m_rotor_node);
   m_flybar_blur = std::make_shared<FlybarBlur>(smgr, m_rotor_node);
@@ -684,9 +696,10 @@ void RcBellHeli::update_ui(float time_delta) {
 
   // Set the main rotor rotation.
   irr::core::matrix4 main_rotor_rotation;
-  main_rotor_rotation.setRotationDegrees(irrvec3(0, m_main_rotor_angle, 0));
+  main_rotor_rotation.setRotationDegrees(
+      raylib::Vector3(0, m_main_rotor_angle, 0));
   m_main_rotor_angle += m_main_rotor_vel * time_delta;
-  irrvec3 main_rotor_offset(0.45, -1.4, 0);
+  raylib::Vector3 main_rotor_offset(0.45, -1.4, 0);
   m_rotor_node->setPosition(-main_rotor_offset);
   irr::core::matrix4 rotor_rotation_in_body_coords =
       m_body_rotation.getTransposed() * m_rotor_rotation;
@@ -696,18 +709,19 @@ void RcBellHeli::update_ui(float time_delta) {
 
   // Set the tail rotor rotation.
   irr::core::matrix4 tail_rotor_rotation;
-  tail_rotor_rotation.setRotationDegrees(irrvec3(0, 0, m_tail_rotor_angle));
+  tail_rotor_rotation.setRotationDegrees(
+      raylib::Vector3(0, 0, m_tail_rotor_angle));
   m_tail_rotor_angle += 3 * m_main_rotor_vel * time_delta;
-  irrvec3 tail_rotor_offset(2.31 * 2, -0.77 * 2, 0);
+  raylib::Vector3 tail_rotor_offset(2.31 * 2, -0.77 * 2, 0);
   m_tail_rotor_node->setPosition(-tail_rotor_offset);
   m_tail_rotor_node->setRotation((tail_rotor_rotation).getRotationDegrees());
 }
 
 const struct HeliParams BELL_AERODYNAMICS = {
-    .init_pos = irrvec3(0, (0.13 + -0.019) * 5, 0),
-    .init_rotation = irrvec3(0, 0, 0),
+    .init_pos = raylib::Vector3(0, (0.13 + -0.019) * 5, 0),
+    .init_rotation = raylib::Vector3(0, 0, 0),
     .mass = 3000.,
-    .drag = irrvec3(1, 0.6, 0.2),
+    .drag = raylib::Vector3(1, 0.6, 0.2),
     .torbulant_airspeed = 7,
     .main_rotor_max_vel = 20,
     .main_rotor_torque = 30000.,
@@ -722,7 +736,7 @@ const struct HeliParams BELL_AERODYNAMICS = {
     .swash_torque = 3000 * 10 * 12, // ~= Mass * G
     .rotor_moment_of_inertia =
         3742, // https://www.quora.com/What-is-the-weight-of-a-normal-light-weighted-helicopter-rotor-blades
-    .body_moment_of_inertia = irrvec3(
+    .body_moment_of_inertia = raylib::Vector3(
         // pitch: 2 masses - one in the tail and one in the body.
         100 * 9 * 9 + 2500 * 1 * 1,
         // yaw: 2 masses - one in the tail and one close.
@@ -733,16 +747,16 @@ const struct HeliParams BELL_AERODYNAMICS = {
     .rigidness = 80000,
     .anti_wobliness = 1. / 10,
 
-    .touchpoints_in_heli = std::vector<irrvec3>(
-        {irrvec3(0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
-                 0.17 * (5. / 6.) * 5),
-         irrvec3(-0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
-                 0.17 * (5. / 6.) * 5),
-         irrvec3(-0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
-                 -0.28 * (5. / 6.) * 5),
-         irrvec3(0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
-                 -0.28 * (5. / 6.) * 5),
-         irrvec3(0, 0.05 * 5, -1.12 * (5. / 6.) * 5)}),
+    .touchpoints_in_heli = std::vector<raylib::Vector3>(
+        {raylib::Vector3(0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
+                         0.17 * (5. / 6.) * 5),
+         raylib::Vector3(-0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
+                         0.17 * (5. / 6.) * 5),
+         raylib::Vector3(-0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
+                         -0.28 * (5. / 6.) * 5),
+         raylib::Vector3(0.19 * (5. / 6.) * 5, -0.12 * (5. / 6.) * 5,
+                         -0.28 * (5. / 6.) * 5),
+         raylib::Vector3(0, 0.05 * 5, -1.12 * (5. / 6.) * 5)}),
 
     .external_torque_limit = 10000};
 
@@ -753,7 +767,7 @@ BellHeli::BellHeli(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *heli_mesh =
       smgr->getMesh("media/Bell/source/bell_body.obj");
   m_body_node = smgr->addMeshSceneNode(heli_mesh);
-  m_body_node->setScale(irrvec3(1., 1., 1.));
+  m_body_node->setScale(raylib::Vector3(1., 1., 1.));
   m_body_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_body_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
   m_body_node->setDebugDataVisible(irr::scene::EDS_OFF);
@@ -768,7 +782,7 @@ BellHeli::BellHeli(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *main_rotor_mesh =
       smgr->getMesh("media/Bell/source/bell_main_rotor.obj");
   irr::core::matrix4 main_rotor_translation;
-  main_rotor_translation.setTranslation(irrvec3(0.45, -1.4, 0));
+  main_rotor_translation.setTranslation(raylib::Vector3(0.45, -1.4, 0));
   smgr->getMeshManipulator()->apply(
       irr::scene::SVertexPositionTransformManipulator(main_rotor_translation),
       main_rotor_mesh);
@@ -787,7 +801,7 @@ BellHeli::BellHeli(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *tail_rotor_mesh =
       smgr->getMesh("media/Bell/source/bell_tail_rotor.obj");
   irr::core::matrix4 tail_rotor_translation;
-  tail_rotor_translation.setTranslation(irrvec3(4.62, -1.54, 0));
+  tail_rotor_translation.setTranslation(raylib::Vector3(4.62, -1.54, 0));
   smgr->getMeshManipulator()->apply(
       irr::scene::SVertexPositionTransformManipulator(tail_rotor_translation),
       tail_rotor_mesh);
@@ -802,7 +816,7 @@ BellHeli::BellHeli(irr::scene::ISceneManager *smgr,
     m_tail_rotor_node->getMaterial(i).AmbientColor.set(255, 255, 255, 255);
   }
 
-  m_shape_rotation.setRotationDegrees(irrvec3(0, -90, 0));
+  m_shape_rotation.setRotationDegrees(raylib::Vector3(0, -90, 0));
 
   m_main_rotor_blur = std::make_shared<MainRotorBlur>(smgr, m_rotor_node);
   m_flybar_blur = std::make_shared<FlybarBlur>(smgr, m_rotor_node);
@@ -824,9 +838,10 @@ void BellHeli::update_ui(float time_delta) {
 
   // Set the main rotor rotation.
   irr::core::matrix4 main_rotor_rotation;
-  main_rotor_rotation.setRotationDegrees(irrvec3(0, m_main_rotor_angle, 0));
+  main_rotor_rotation.setRotationDegrees(
+      raylib::Vector3(0, m_main_rotor_angle, 0));
   m_main_rotor_angle += m_main_rotor_vel * time_delta;
-  irrvec3 main_rotor_offset(0.45, -1.4, 0);
+  raylib::Vector3 main_rotor_offset(0.45, -1.4, 0);
   m_rotor_node->setPosition(-main_rotor_offset);
   irr::core::matrix4 rotor_rotation_in_body_coords =
       m_body_rotation.getTransposed() * m_rotor_rotation;
@@ -836,9 +851,10 @@ void BellHeli::update_ui(float time_delta) {
 
   // Set the tail rotor rotation.
   irr::core::matrix4 tail_rotor_rotation;
-  tail_rotor_rotation.setRotationDegrees(irrvec3(0, 0, m_tail_rotor_angle));
+  tail_rotor_rotation.setRotationDegrees(
+      raylib::Vector3(0, 0, m_tail_rotor_angle));
   m_tail_rotor_angle += 3 * m_main_rotor_vel * time_delta;
-  irrvec3 tail_rotor_offset(2.31 * 2, -0.77 * 2, 0);
+  raylib::Vector3 tail_rotor_offset(2.31 * 2, -0.77 * 2, 0);
   m_tail_rotor_node->setPosition(-tail_rotor_offset);
   m_tail_rotor_node->setRotation((tail_rotor_rotation).getRotationDegrees());
 }

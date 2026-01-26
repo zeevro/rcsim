@@ -13,10 +13,10 @@ Arrow::Arrow(irr::scene::ISceneManager *smgr, irr::scene::ISceneNode *parent) {
   arrow_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   arrow_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
   arrow_node->setDebugDataVisible(irr::scene::EDS_OFF);
-  arrow_node->setRotation(irrvec3(90, 0, 0));
+  arrow_node->setRotation(raylib::Vector3(90, 0, 0));
 }
 
-void Arrow::point(const irrvec3 &at) {
-  m_node->setScale(irrvec3(0.2, 0.2, at.getLength()));
+void Arrow::point(const raylib::Vector3 &at) {
+  m_node->setScale(raylib::Vector3(0.2, 0.2, at.getLength()));
   m_node->setRotation(at.getHorizontalAngle());
 }

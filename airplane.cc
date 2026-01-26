@@ -7,12 +7,12 @@ const double GRAVITY_CONSTANT = 9.8;
 const float AIR_DENSITY = 1.2;
 const float LIFT_COEFFICIENT = 3;
 
-typedef irr::core::vector3df irrvec3;
+typedef irr::core::vector3df raylib::Vector3;
 
-static irrvec3 advection_force(const irrvec3 &airflow,
-                               const irrvec3 &surface_normal,
-                               float surface_area) {
-  irrvec3 airflow_direction = irrvec3(airflow).normalize();
+static raylib::Vector3 advection_force(const raylib::Vector3 &airflow,
+                                       const raylib::Vector3 &surface_normal,
+                                       float surface_area) {
+  raylib::Vector3 airflow_direction = raylib::Vector3(airflow).normalize();
   float airflow_dot_normal = airflow.dotProduct(surface_normal);
   float effective_area =
       std::sqrt(std::abs(airflow_direction.dotProduct(surface_normal))) *
@@ -28,7 +28,7 @@ static irrvec3 advection_force(const irrvec3 &airflow,
   return surface_normal * advection_magnitude;
 }
 
-static irrvec3 rotate(irr::core::matrix4 matrix, irrvec3 vec) {
+static raylib::Vector3 rotate(irr::core::matrix4 matrix, raylib::Vector3 vec) {
   matrix.rotateVect(vec);
   return vec;
 }
@@ -37,7 +37,7 @@ static irrvec3 rotate(irr::core::matrix4 matrix, irrvec3 vec) {
 // PointAirFoil class implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-AppliedForce PointAirFoil::get_force(const irrvec3 &airflow) {
+AppliedForce PointAirFoil::get_force(const raylib::Vector3 &airflow) {
   float airflow_dot_normal = airflow.dotProduct(m_params.normal);
   float airflow_dot_wing = airflow.dotProduct(m_params.wing_airflow_direction);
   float angle_of_attack =
@@ -45,25 +45,27 @@ AppliedForce PointAirFoil::get_force(const irrvec3 &airflow) {
 
   // The Advection lift is the force that originates in the fact that air
   // collides in the wing.
-  irrvec3 lift = advection_force(airflow, m_params.normal, m_params.area);
+  raylib::Vector3 lift =
+      advection_force(airflow, m_params.normal, m_params.area);
 
   // The drag;
-  irrvec3 drag = advection_force(airflow, m_params.wing_airflow_direction,
-                                 m_params.drag_area);
+  raylib::Vector3 drag = advection_force(
+      airflow, m_params.wing_airflow_direction, m_params.drag_area);
 
   // The flaps
-  irrvec3 flap = advection_force(airflow, m_flap_normal, m_params.flap_area);
+  raylib::Vector3 flap =
+      advection_force(airflow, m_flap_normal, m_params.flap_area);
 
   // The wing effect, which depends on the airflow on the (normal, wing
   // direction) plane.
-  irrvec3 wing_effect;
+  raylib::Vector3 wing_effect;
   if ((angle_of_attack > m_params.stall_angle_min) &&
       (angle_of_attack < m_params.stall_angle_max)) {
     wing_effect = (lift + flap) * LIFT_COEFFICIENT;
   }
 
   // The total force.
-  irrvec3 force = drag + lift + flap + wing_effect;
+  raylib::Vector3 force = drag + lift + flap + wing_effect;
 
   // If UI initialized, update it.
   if (m_force_arrow) {
@@ -94,12 +96,12 @@ RectangularAirFoil::RectangularAirFoil(const RectangularAirFoil::Params &params)
     : m_params(params) {
   irrmat4 rotoation_mat;
   rotoation_mat.setRotationDegrees(m_params.rotation_angles);
-  irrvec3 normal(0, 1, 0), wing_direction(0, 0, 1), along_wing(1, 0, 0);
+  raylib::Vector3 normal(0, 1, 0), wing_direction(0, 0, 1), along_wing(1, 0, 0);
   rotoation_mat.rotateVect(normal);
   rotoation_mat.rotateVect(wing_direction);
   rotoation_mat.rotateVect(along_wing);
 
-  irrvec3 wing_start =
+  raylib::Vector3 wing_start =
       m_params.position_in_airplane - along_wing * m_params.x_length / 2;
   float points_interval = m_params.x_length / (m_params.num_points - 1);
   float wing_area = m_params.z_width * m_params.x_length;
@@ -109,7 +111,7 @@ RectangularAirFoil::RectangularAirFoil(const RectangularAirFoil::Params &params)
   float point_drag_area = drag_area / (m_params.num_points + 1);
 
   for (int i = 0; i < m_params.num_points; i++) {
-    irrvec3 position = wing_start + i * points_interval * along_wing;
+    raylib::Vector3 position = wing_start + i * points_interval * along_wing;
     float point_specific_area = point_area;
     float point_specific_drag_area = point_drag_area;
     if ((i == 0) || (i == m_params.num_points - 1)) {
@@ -140,12 +142,12 @@ RectangularAirFoil::RectangularAirFoil(const RectangularAirFoil::Params &params)
 }
 
 std::vector<AppliedForce>
-RectangularAirFoil::calc_force(const irrvec3 &wind_in_airplane,
-                               const irrvec3 &velocity_in_airplane,
-                               const irrvec3 &omega_in_airplane) {
+RectangularAirFoil::calc_force(const raylib::Vector3 &wind_in_airplane,
+                               const raylib::Vector3 &velocity_in_airplane,
+                               const raylib::Vector3 &omega_in_airplane) {
   std::vector<AppliedForce> forces;
   for (auto point_airfoil : m_point_airfoils) {
-    irrvec3 point_airflow =
+    raylib::Vector3 point_airflow =
         wind_in_airplane - velocity_in_airplane -
         omega_in_airplane.crossProduct(point_airfoil->get_position());
     AppliedForce force = point_airfoil->get_force(point_airflow);
@@ -164,7 +166,7 @@ void RectangularAirFoil::set_flap(float value) {
   float angle_radians = angle / 180 * M_PI;
   irrmat4 rotation;
   rotation.setRotationAxisRadians(-angle_radians, m_along_wing_direction);
-  irrvec3 flap_normal = m_wing_normal;
+  raylib::Vector3 flap_normal = m_wing_normal;
   rotation.rotateVect(flap_normal);
   for (auto point_airfoil : m_point_airfoils) {
     point_airfoil->set_flap_normal(flap_normal);
@@ -205,15 +207,16 @@ void Propellant::init_ui(irr::scene::ISceneManager *smgr,
   point_node->setDebugDataVisible(irr::scene::EDS_OFF);
 }
 
-AppliedForce Propellant::calc_force(const irrvec3 &wind_in_airplane,
-                                    const irrvec3 &velocity_in_airplane) {
-  irrvec3 airflow = wind_in_airplane - velocity_in_airplane;
+AppliedForce
+Propellant::calc_force(const raylib::Vector3 &wind_in_airplane,
+                       const raylib::Vector3 &velocity_in_airplane) {
+  raylib::Vector3 airflow = wind_in_airplane - velocity_in_airplane;
   float airflow_dot_direction =
       m_params.direction_in_airplane.dotProduct(airflow);
   float airflow_diff = m_params.thrust_airspeed - airflow_dot_direction;
   float airflow_ratio = airflow_diff / m_params.thrust_airspeed;
   float force_magnitude = airflow_ratio * m_params.max_thrust * m_throttle;
-  irrvec3 force = -force_magnitude * m_params.direction_in_airplane;
+  raylib::Vector3 force = -force_magnitude * m_params.direction_in_airplane;
 
   // If UI initialized, update it.
   if (m_force_arrow) {
@@ -280,7 +283,7 @@ void Airplane::init_ui(irr::scene::ISceneManager *smgr,
   }
 }
 
-void Airplane::update(double time_delta, const irrvec3 &wind_speed) {
+void Airplane::update(double time_delta, const raylib::Vector3 &wind_speed) {
   // Update the servos.
   for (size_t i = 0; i < m_servos.size(); i++) {
     if (m_params.channel_flap_mapping.find(i) !=
@@ -295,11 +298,11 @@ void Airplane::update(double time_delta, const irrvec3 &wind_speed) {
   }
 
   // Calculate the forces from the airfoils.
-  irrvec3 airfoil_forces_in_airplane;
-  irrvec3 airfoil_torque_in_airplane;
-  irrvec3 wind_in_airplane =
+  raylib::Vector3 airfoil_forces_in_airplane;
+  raylib::Vector3 airfoil_torque_in_airplane;
+  raylib::Vector3 wind_in_airplane =
       rotate(m_rotation_in_world.getTransposed(), wind_speed);
-  irrvec3 velocity_in_ariplane =
+  raylib::Vector3 velocity_in_ariplane =
       rotate(m_rotation_in_world.getTransposed(), m_velocity_in_world);
   for (const auto &airfoil : m_airfoils) {
     std::vector<AppliedForce> forces_in_airplane = airfoil->calc_force(
@@ -310,12 +313,12 @@ void Airplane::update(double time_delta, const irrvec3 &wind_speed) {
           force.position_in_airplane.crossProduct(force.force);
     }
   }
-  irrvec3 airfoil_force_in_world =
+  raylib::Vector3 airfoil_force_in_world =
       rotate(m_rotation_in_world, airfoil_forces_in_airplane);
 
   // Calculate the force from the propellants.
-  irrvec3 prop_forces_in_airplane;
-  irrvec3 prop_torque_in_airplane;
+  raylib::Vector3 prop_forces_in_airplane;
+  raylib::Vector3 prop_torque_in_airplane;
   for (const auto &prop : m_propellants) {
     AppliedForce force_in_airplane =
         prop->calc_force(wind_in_airplane, velocity_in_ariplane);
@@ -324,29 +327,31 @@ void Airplane::update(double time_delta, const irrvec3 &wind_speed) {
         force_in_airplane.position_in_airplane.crossProduct(
             force_in_airplane.force);
   }
-  irrvec3 propellant_force_in_world =
+  raylib::Vector3 propellant_force_in_world =
       rotate(m_rotation_in_world, prop_forces_in_airplane);
 
   // Gravity force.
-  irrvec3 gravity_in_world = irrvec3(0, -m_params.mass * GRAVITY_CONSTANT, 0);
+  raylib::Vector3 gravity_in_world =
+      raylib::Vector3(0, -m_params.mass * GRAVITY_CONSTANT, 0);
 
   // Update position and velocity according to the forces.
-  irrvec3 total_force = airfoil_force_in_world + propellant_force_in_world +
-                        gravity_in_world + m_external_force_in_world;
+  raylib::Vector3 total_force = airfoil_force_in_world +
+                                propellant_force_in_world + gravity_in_world +
+                                m_external_force_in_world;
   m_velocity_in_world += total_force / m_params.mass * time_delta;
   m_position_in_world += m_velocity_in_world * time_delta;
 
   // Update the rotation according to the moments using Euler's equation.
-  irrvec3 total_torque_in_airplane = airfoil_torque_in_airplane +
-                                     prop_torque_in_airplane +
-                                     m_external_torque_in_airplane;
+  raylib::Vector3 total_torque_in_airplane = airfoil_torque_in_airplane +
+                                             prop_torque_in_airplane +
+                                             m_external_torque_in_airplane;
   m_angular_velocity_in_airplane +=
       time_delta *
       (total_torque_in_airplane -
        m_angular_velocity_in_airplane.crossProduct(
            m_params.moi * m_angular_velocity_in_airplane)) /
       m_params.moi;
-  irrvec3 angulal_velocity_in_world =
+  raylib::Vector3 angulal_velocity_in_world =
       rotate(m_rotation_in_world, m_angular_velocity_in_airplane);
   update_rotation_matrix(m_rotation_in_world,
                          angulal_velocity_in_world * time_delta);
@@ -357,7 +362,8 @@ void Airplane::update(double time_delta, const irrvec3 &wind_speed) {
   m_airspeed = (m_velocity_in_world - wind_speed).getLength();
 }
 
-void Airplane::add_force(unsigned int touchpoint_index, const irrvec3 &force) {
+void Airplane::add_force(unsigned int touchpoint_index,
+                         const raylib::Vector3 &force) {
   m_external_force_in_world += force;
   m_external_torque_in_airplane +=
       m_params.touchpoints_in_airplane[touchpoint_index].pos.crossProduct(
@@ -365,8 +371,8 @@ void Airplane::add_force(unsigned int touchpoint_index, const irrvec3 &force) {
 }
 
 void Airplane::reset_force() {
-  m_external_force_in_world = irrvec3();
-  m_external_torque_in_airplane = irrvec3();
+  m_external_force_in_world = raylib::Vector3();
+  m_external_torque_in_airplane = raylib::Vector3();
 }
 
 std::vector<Airplane::TouchPoint> Airplane::get_touchpoints_in_world() const {
@@ -388,7 +394,7 @@ std::vector<Airplane::TouchPoint> Airplane::get_touchpoints_in_world() const {
       float angle =
           m_servos[wheel_conf.servo_index].get() * wheel_conf.max_angle;
       irrmat4 wheel_rot;
-      wheel_rot.setRotationDegrees(irrvec3(0, -angle, 0));
+      wheel_rot.setRotationDegrees(raylib::Vector3(0, -angle, 0));
       friction_in_body =
           wheel_rot * friction_in_body * wheel_rot.getTransposed();
     }

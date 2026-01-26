@@ -14,7 +14,7 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
     : Airplane(
           {
               .mass = TOTAL_MASS,
-              .moi = irrvec3(
+              .moi = raylib::Vector3(
                   (1. / 12) * FUESLAGE_MASS * FUSELAGE_LENGTH * FUSELAGE_LENGTH,
                   (1. / 12) * WING_MASS * WING_LENGTH * WING_LENGTH,
                   (1. / 12) * FUSELAGE_LENGTH * FUSELAGE_LENGTH *
@@ -27,9 +27,9 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 2,
                           .z_width = WING_WIDTH,
                           .y_thickness = 0.0001,
-                          .rotation_angles = irrvec3(-2, 0, -5),
+                          .rotation_angles = raylib::Vector3(-2, 0, -5),
                           .position_in_airplane =
-                              irrvec3(-WING_LENGTH / 4, 0, 0),
+                              raylib::Vector3(-WING_LENGTH / 4, 0, 0),
                           .num_points = 5,
                           .stall_angle_min = -3,
                           .stall_angle_max = 15,
@@ -44,9 +44,9 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 2,
                           .z_width = WING_WIDTH,
                           .y_thickness = 0.0001,
-                          .rotation_angles = irrvec3(-2, 0, 5),
+                          .rotation_angles = raylib::Vector3(-2, 0, 5),
                           .position_in_airplane =
-                              irrvec3(WING_LENGTH / 4, 0, 0),
+                              raylib::Vector3(WING_LENGTH / 4, 0, 0),
                           .num_points = 5,
                           .stall_angle_min = -3,
                           .stall_angle_max = 15,
@@ -61,9 +61,9 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
                           .x_length = FUSELAGE_LENGTH,
                           .z_width = 0.01,
                           .y_thickness = 0.001,
-                          .rotation_angles = irrvec3(0, 90, 90),
-                          .position_in_airplane =
-                              irrvec3(0, -0.05, -FUSELAGE_LENGTH * 0.2f),
+                          .rotation_angles = raylib::Vector3(0, 90, 90),
+                          .position_in_airplane = raylib::Vector3(
+                              0, -0.05, -FUSELAGE_LENGTH * 0.2f),
                           .num_points = 5,
                           .stall_angle_min = 0,
                           .stall_angle_max = 0,
@@ -74,9 +74,9 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 4,
                           .z_width = WING_WIDTH / 2,
                           .y_thickness = 0.0005,
-                          .rotation_angles = irrvec3(0, 0, 0),
+                          .rotation_angles = raylib::Vector3(0, 0, 0),
                           .position_in_airplane =
-                              irrvec3(0, 0, -FUSELAGE_LENGTH * 0.6f),
+                              raylib::Vector3(0, 0, -FUSELAGE_LENGTH * 0.6f),
                           .num_points = 2,
                           .stall_angle_min = -3,
                           .stall_angle_max = 3,
@@ -91,8 +91,8 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 6,
                           .z_width = WING_WIDTH / 2,
                           .y_thickness = 0.0005,
-                          .rotation_angles = irrvec3(0, 0, 90),
-                          .position_in_airplane = irrvec3(
+                          .rotation_angles = raylib::Vector3(0, 0, 90),
+                          .position_in_airplane = raylib::Vector3(
                               0, WING_LENGTH / 8 / 2, -FUSELAGE_LENGTH * 0.6f),
                           .num_points = 2,
                           .stall_angle_min = -3,
@@ -113,9 +113,9 @@ SimpleGlider::SimpleGlider(irr::scene::ISceneManager *smgr,
                   },
               .servo_max_rps = {1, 1, 1, 1, 1, 1},
               .servo_init_values = {-1, 0, 0, 0, 0, 0},
-              .init_position = irrvec3(1, 10, -1),
-              .init_velocity = irrvec3(0, 0, 10),
-              .init_rotation = irrvec3(0, 0, 0),
+              .init_position = raylib::Vector3(1, 10, -1),
+              .init_velocity = raylib::Vector3(0, 0, 10),
+              .init_rotation = raylib::Vector3(0, 0, 0),
           },
           smgr, driver) {}
 
@@ -132,7 +132,7 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
     : Airplane(
           {
               .mass = TOTAL_MASS,
-              .moi = irrvec3(
+              .moi = raylib::Vector3(
                   (1. / 12) * FUESLAGE_MASS * FUSELAGE_LENGTH * FUSELAGE_LENGTH,
                   (1. / 12) * WING_MASS * WING_LENGTH * WING_LENGTH,
                   (1. / 12) * FUSELAGE_LENGTH * FUSELAGE_LENGTH *
@@ -145,9 +145,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 2,
                           .z_width = WING_WIDTH,
                           .y_thickness = 0.01,
-                          .rotation_angles = irrvec3(-3, 0, -1),
+                          .rotation_angles = raylib::Vector3(-3, 0, -1),
                           .position_in_airplane =
-                              irrvec3(-WING_LENGTH / 4, 0.12, 0),
+                              raylib::Vector3(-WING_LENGTH / 4, 0.12, 0),
                           .num_points = 5,
                           .stall_angle_min = -10,
                           .stall_angle_max = 15,
@@ -163,9 +163,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 2,
                           .z_width = WING_WIDTH,
                           .y_thickness = 0.01,
-                          .rotation_angles = irrvec3(-3, 0, 1),
+                          .rotation_angles = raylib::Vector3(-3, 0, 1),
                           .position_in_airplane =
-                              irrvec3(WING_LENGTH / 4, 0.12, 0),
+                              raylib::Vector3(WING_LENGTH / 4, 0.12, 0),
                           .num_points = 5,
                           .stall_angle_min = -10,
                           .stall_angle_max = 15,
@@ -181,9 +181,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                           .x_length = FUSELAGE_LENGTH,
                           .z_width = 0.10,
                           .y_thickness = 1e-4,
-                          .rotation_angles = irrvec3(0, 90, 90),
-                          .position_in_airplane =
-                              irrvec3(0, -0.05, -FUSELAGE_LENGTH * 0.2f),
+                          .rotation_angles = raylib::Vector3(0, 90, 90),
+                          .position_in_airplane = raylib::Vector3(
+                              0, -0.05, -FUSELAGE_LENGTH * 0.2f),
                           .num_points = 5,
                           .stall_angle_min = 0,
                           .stall_angle_max = 0,
@@ -194,9 +194,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 4,
                           .z_width = WING_WIDTH / 2,
                           .y_thickness = 0.005,
-                          .rotation_angles = irrvec3(0, 0, 0),
-                          .position_in_airplane =
-                              irrvec3(0, -0.03, -FUSELAGE_LENGTH * 0.65f),
+                          .rotation_angles = raylib::Vector3(0, 0, 0),
+                          .position_in_airplane = raylib::Vector3(
+                              0, -0.03, -FUSELAGE_LENGTH * 0.65f),
                           .num_points = 2,
                           .stall_angle_min = -3,
                           .stall_angle_max = 3,
@@ -212,8 +212,8 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                           .x_length = WING_LENGTH / 6,
                           .z_width = WING_WIDTH / 2,
                           .y_thickness = 0.005,
-                          .rotation_angles = irrvec3(0, 0, 90),
-                          .position_in_airplane = irrvec3(
+                          .rotation_angles = raylib::Vector3(0, 0, 90),
+                          .position_in_airplane = raylib::Vector3(
                               0, WING_LENGTH / 8 / 2, -FUSELAGE_LENGTH * 0.7f),
                           .num_points = 2,
                           .stall_angle_min = -3,
@@ -229,9 +229,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                           .x_length = FUSELAGE_LENGTH,
                           .z_width = 0.1,
                           .y_thickness = 1e-4,
-                          .rotation_angles = irrvec3(0, 90, 0),
-                          .position_in_airplane =
-                              irrvec3(0, -0.05, -FUSELAGE_LENGTH * 0.2f),
+                          .rotation_angles = raylib::Vector3(0, 90, 0),
+                          .position_in_airplane = raylib::Vector3(
+                              0, -0.05, -FUSELAGE_LENGTH * 0.2f),
                           .num_points = 5,
                           .stall_angle_min = 0,
                           .stall_angle_max = 0,
@@ -248,9 +248,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
               .propellants =
                   {
                       {
-                          .direction_in_airplane = irrvec3(0, 0, -1),
+                          .direction_in_airplane = raylib::Vector3(0, 0, -1),
                           .position_in_airplane =
-                              irrvec3(0, 0.0f, FUSELAGE_LENGTH * 0.3),
+                              raylib::Vector3(0, 0.0f, FUSELAGE_LENGTH * 0.3),
                           .thrust_airspeed = 50.0f,
                           .max_thrust = 18.0f,
                       },
@@ -262,26 +262,26 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
               .touchpoints_in_airplane =
                   {
                       // Wheels:
-                      {.pos = irrvec3(0.0, -0.26, 0.3),
+                      {.pos = raylib::Vector3(0.0, -0.26, 0.3),
                        .friction_coeff = diag2(15.0f, 0.3f)},
-                      {.pos = irrvec3(0.23, -0.26, -0.07),
+                      {.pos = raylib::Vector3(0.23, -0.26, -0.07),
                        .friction_coeff = diag2(15.0f, 0.3f)},
-                      {.pos = irrvec3(-0.23, -0.26, -0.07),
+                      {.pos = raylib::Vector3(-0.23, -0.26, -0.07),
                        .friction_coeff = diag2(15.0f, 0.3f)},
                       // Wing touchpoints:
-                      {.pos = irrvec3(1.0, 0.12, 0.14),
+                      {.pos = raylib::Vector3(1.0, 0.12, 0.14),
                        .friction_coeff = diag2(3.0f, 3.0f)},
-                      {.pos = irrvec3(-1.0, 0.12, 0.14),
+                      {.pos = raylib::Vector3(-1.0, 0.12, 0.14),
                        .friction_coeff = diag2(3.0f, 3.0f)},
-                      {.pos = irrvec3(1.0, 0.12, -0.14),
+                      {.pos = raylib::Vector3(1.0, 0.12, -0.14),
                        .friction_coeff = diag2(3.0f, 3.0f)},
-                      {.pos = irrvec3(-1.0, 0.12, -0.14),
+                      {.pos = raylib::Vector3(-1.0, 0.12, -0.14),
                        .friction_coeff = diag2(3.0f, 3.0f)},
                       // Back touchpoint:
-                      {.pos = irrvec3(0.0, 0.0, -1.),
+                      {.pos = raylib::Vector3(0.0, 0.0, -1.),
                        .friction_coeff = diag2(3.0f, 3.0f)},
                       // Engine touchpoint:
-                      {.pos = irrvec3(0, 0, FUSELAGE_LENGTH * 0.2),
+                      {.pos = raylib::Vector3(0, 0, FUSELAGE_LENGTH * 0.2),
                        .friction_coeff = diag2(3.0f, 3.0f)},
                   },
               .touchpoint_to_channel_mapping =
@@ -291,9 +291,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                   },
               .servo_max_rps = {1, 3, 3, 3, 3, 3},
               .servo_init_values = {-1, 0, 0, 0, 0, 0},
-              .init_position = irrvec3(0, 0.3, 0),
-              .init_velocity = irrvec3(0, 0, 0),
-              .init_rotation = irrvec3(0, 0, 0),
+              .init_position = raylib::Vector3(0, 0.3, 0),
+              .init_velocity = raylib::Vector3(0, 0, 0),
+              .init_rotation = raylib::Vector3(0, 0, 0),
               .show_skeleton = false,
           },
           smgr, driver) {
@@ -302,8 +302,8 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
       smgr->getMesh("media/cessna/CessnaBodyFixed2.obj");
   m_body_node = smgr->addMeshSceneNode(body_mesh, m_ui_node);
 
-  m_body_node->setScale(irrvec3(1. / 4, 1. / 4, 1. / 4));
-  m_body_node->setPosition(irrvec3(0, -0.07, 0));
+  m_body_node->setScale(raylib::Vector3(1. / 4, 1. / 4, 1. / 4));
+  m_body_node->setPosition(raylib::Vector3(0, -0.07, 0));
   m_body_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_body_node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
   m_body_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
@@ -316,8 +316,8 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *ailron_mesh =
       smgr->getMesh("media/cessna/CessnaAilron.obj");
   m_left_ailron_node = smgr->addMeshSceneNode(ailron_mesh, m_ui_node);
-  m_left_ailron_node->setScale(irrvec3(1. / 4, 1. / 4, 1. / 4));
-  m_left_ailron_node->setPosition(irrvec3(-0.33, 0.105, -0.12));
+  m_left_ailron_node->setScale(raylib::Vector3(1. / 4, 1. / 4, 1. / 4));
+  m_left_ailron_node->setPosition(raylib::Vector3(-0.33, 0.105, -0.12));
   m_left_ailron_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_left_ailron_node->setMaterialType(
       irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
@@ -327,8 +327,8 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
   m_left_ailron_node->addShadowVolumeSceneNode();
 
   m_right_ailron_node = smgr->addMeshSceneNode(ailron_mesh, m_ui_node);
-  m_right_ailron_node->setScale(irrvec3(1. / 4, 1. / 4, 1. / 4));
-  m_right_ailron_node->setPosition(irrvec3(0.33, 0.105, -0.12));
+  m_right_ailron_node->setScale(raylib::Vector3(1. / 4, 1. / 4, 1. / 4));
+  m_right_ailron_node->setPosition(raylib::Vector3(0.33, 0.105, -0.12));
   m_right_ailron_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_right_ailron_node->setMaterialType(
       irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
@@ -341,9 +341,9 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
   irr::scene::IMesh *elevator_mesh =
       smgr->getMesh("media/cessna/CessnaElevator.obj");
   m_elevator_node = smgr->addMeshSceneNode(elevator_mesh, m_ui_node);
-  m_elevator_node->setScale(irrvec3(1. / 4, 1. / 4, 1. / 4));
-  m_elevator_node->setPosition(irrvec3(0, -0.04, -0.9));
-  m_elevator_node->setRotation(irrvec3(0, 0, 0));
+  m_elevator_node->setScale(raylib::Vector3(1. / 4, 1. / 4, 1. / 4));
+  m_elevator_node->setPosition(raylib::Vector3(0, -0.04, -0.9));
+  m_elevator_node->setRotation(raylib::Vector3(0, 0, 0));
   m_elevator_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_elevator_node->setMaterialType(
       irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
@@ -354,12 +354,12 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
   m_elevator_node->addShadowVolumeSceneNode();
 
   irr::scene::ISceneNode *rudder_base = smgr->addEmptySceneNode(m_ui_node);
-  rudder_base->setPosition(irrvec3(0, -0.07, -0.86));
-  rudder_base->setRotation(irrvec3(-30, 0, 0));
+  rudder_base->setPosition(raylib::Vector3(0, -0.07, -0.86));
+  rudder_base->setRotation(raylib::Vector3(-30, 0, 0));
   irr::scene::IMesh *rudder_mesh =
       smgr->getMesh("media/cessna/CessnaRudder.obj");
   m_rudder_node = smgr->addMeshSceneNode(rudder_mesh, rudder_base);
-  m_rudder_node->setScale(irrvec3(1. / 4, 1. / 4, 1. / 4));
+  m_rudder_node->setScale(raylib::Vector3(1. / 4, 1. / 4, 1. / 4));
   m_rudder_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_rudder_node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
   m_rudder_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
@@ -370,8 +370,8 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
 
   irr::scene::IMesh *prop_mesh = smgr->getMesh("media/cessna/CessnaProp.obj");
   m_prop_node = smgr->addMeshSceneNode(prop_mesh, m_ui_node);
-  m_prop_node->setScale(irrvec3(1. / 4, 1. / 4, 1. / 4));
-  m_prop_node->setPosition(irrvec3(0, 0, 0.4));
+  m_prop_node->setScale(raylib::Vector3(1. / 4, 1. / 4, 1. / 4));
+  m_prop_node->setPosition(raylib::Vector3(0, 0, 0.4));
   m_prop_node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
   m_prop_node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
   m_prop_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
@@ -387,14 +387,14 @@ void Trainer::update_ui() {
   Airplane::update_ui();
   m_prop_angle +=
       (m_servos[AIRPLANE_CHANNEL_THROTTLE].get() + 1.0) * 3412.0f * 0.1f;
-  m_prop_node->setRotation(irrvec3(0, 0, m_prop_angle));
+  m_prop_node->setRotation(raylib::Vector3(0, 0, m_prop_angle));
 
   m_left_ailron_node->setRotation(
-      irrvec3(m_servos[AIRPLANE_CHANNEL_ROLL].get() * 45., 0, -4));
-  m_right_ailron_node->setRotation(
-      -irrvec3(m_servos[AIRPLANE_CHANNEL_FLAPRON].get() * 45. - 7, 0, 177));
+      raylib::Vector3(m_servos[AIRPLANE_CHANNEL_ROLL].get() * 45., 0, -4));
+  m_right_ailron_node->setRotation(-raylib::Vector3(
+      m_servos[AIRPLANE_CHANNEL_FLAPRON].get() * 45. - 7, 0, 177));
   m_elevator_node->setRotation(
-      irrvec3(m_servos[AIRPLANE_CHANNEL_PITCH].get() * 45., 0, 0));
+      raylib::Vector3(m_servos[AIRPLANE_CHANNEL_PITCH].get() * 45., 0, 0));
   m_rudder_node->setRotation(
-      irrvec3(0, m_servos[AIRPLANE_CHANNEL_YAW].get() * 45., 0));
+      raylib::Vector3(0, m_servos[AIRPLANE_CHANNEL_YAW].get() * 45., 0));
 }

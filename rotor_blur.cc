@@ -3,13 +3,15 @@
 const float PI = 3.14159265;
 
 void RotorBlur::init_ui(irr::scene::ISceneManager *smgr, float radius,
-                        irrvec3 position, irrvec3 rotation, float thickness,
+                        raylib::Vector3 position, raylib::Vector3 rotation,
+                        float thickness,
                         irr::scene::IMeshSceneNode *parent_node) {
-  m_blur_node = smgr->addSphereSceneNode(radius,
-                                         256, // num vertices.
-                                         parent_node, -1, position, rotation,
-                                         irrvec3(1, thickness, 1) // scale.
-  );
+  m_blur_node =
+      smgr->addSphereSceneNode(radius,
+                               256, // num vertices.
+                               parent_node, -1, position, rotation,
+                               raylib::Vector3(1, thickness, 1) // scale.
+      );
   m_blur_node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
   m_blur_node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
   m_blur_node->getMaterial(0).MaterialType =

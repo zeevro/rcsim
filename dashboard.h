@@ -3,7 +3,7 @@
 
 #include "controls.h"
 #include "flying_object.h"
-#include <irrlicht/irrlicht.h>
+#include <raylib.hpp>
 #include <vector>
 
 class HorizontalControlsInstrument {

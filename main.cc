@@ -2,7 +2,7 @@
 #include "input_event_reciever.h"
 #include "model_configurations.h"
 #include <iostream>
-#include <irrlicht/irrlicht.h>
+#include <raylib.hpp>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -173,7 +173,7 @@ int main() {
 
   irr::scene::ICameraSceneNode *camera_node =
       device->getSceneManager()->addCameraSceneNode();
-  irrvec3 camera_pos(0, 1.5, -3);
+  raylib::Vector3 camera_pos(0, 1.5, -3);
   camera_node->setPosition(camera_pos);
 
   /*
@@ -224,7 +224,7 @@ int main() {
       model_conf.model->get_servo(channel).update(servo_data[channel],
                                                   time_delta);
     }
-    model_conf.model->update(time_delta, irrvec3(0, 0, 0));
+    model_conf.model->update(time_delta, raylib::Vector3(0, 0, 0));
 
     // Apply external force on the helicopter touch points.
     model_conf.model->reset_force();
@@ -233,8 +233,9 @@ int main() {
     for (unsigned int i = 0; i < touchpoints.size(); i++) {
       BaseHeli::TouchPoint tp = touchpoints[i];
       if (tp.pos.Y < 0) {
-        irrvec3 tp_force = irrvec3(0, -500 * tp.pos.Y, 0) * model_mass;
-        irrvec3 friction_force;
+        raylib::Vector3 tp_force =
+            raylib::Vector3(0, -500 * tp.pos.Y, 0) * model_mass;
+        raylib::Vector3 friction_force;
         friction_force = tp.vel;
         tp.friction_coeff.rotateVect(friction_force);
         friction_force.Y = 10.0f * tp.vel.Y;

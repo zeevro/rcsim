@@ -6,7 +6,6 @@ const int NUM_AVAILABLE_CURVES = 2;
 EventReceiver::EventReceiver() {
   for (u32 i = 0; i < irr::KEY_KEY_CODES_COUNT; ++i)
     KeyIsDown[i] = false;
-  m_use_joystick = false;
   m_joystick_active = false;
   m_user_input.controls_input.pitch_stick = 0;
   m_user_input.controls_input.roll_stick = 0;
@@ -38,25 +37,17 @@ bool EventReceiver::OnEvent(const irr::SEvent &event) {
       m_user_input.controls_input.throttle_hold =
           !m_user_input.controls_input.throttle_hold;
     }
-
-    if (event.KeyInput.Key == KEY_KEY_J && event.KeyInput.PressedDown) {
-      m_use_joystick = !m_use_joystick;
-      if (!m_use_joystick)
-        m_joystick_active = false;
-    }
   }
 
   // The state of each connected joystick is sent to us
   // once every run() of the Irrlicht device.  Store the
   // state of the first joystick, ignoring other joysticks.
   // This is currently only supported on Windows and Linux.
-  if (m_use_joystick) {
-    if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT &&
-        event.JoystickEvent.Joystick == 0) {
-      JoystickState = event.JoystickEvent;
-      m_joystick_active = true;
-    }
-  }
+  // if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT &&
+  //     event.JoystickEvent.Joystick == 0) {
+  //   JoystickState = event.JoystickEvent;
+  //   m_joystick_active = true;
+  // }
 
   return false;
 }

@@ -1,8 +1,8 @@
-CXXFLAGS = -O3 -Wall -Werror -g
+CXXFLAGS = -O3 -Wall -Werror -g -I../raylib-cpp/include
 LDFLAGS = -rdynamic -g
 
 # target specific settings
-LDFLAGS += -lIrrlicht
+LDFLAGS += -lraylib
 
 HEADERS = $(wildcard *.h)
 SRCS = $(wildcard *.cc)

@@ -3,9 +3,9 @@
 
 #include "arrow.h"
 #include "flying_object.h"
-#include <irrlicht/irrlicht.h>
 #include <map>
 #include <memory>
+#include <raylib.hpp>
 #include <vector>
 
 typedef irr::core::matrix4 irrmat4;
@@ -20,8 +20,8 @@ enum AirplaneChannels {
 };
 
 struct AppliedForce {
-  irrvec3 force;
-  irrvec3 position_in_airplane;
+  raylib::Vector3 force;
+  raylib::Vector3 position_in_airplane;
 };
 
 struct PointAirFoil {
@@ -31,23 +31,25 @@ public:
     float flap_area;
     // The drag is only applied on the airflow_direction direction.
     float drag_area;
-    irrvec3 position_in_airplane;
-    irrvec3 normal;
+    raylib::Vector3 position_in_airplane;
+    raylib::Vector3 normal;
     // While lift can happen in all directions, this indicates the
     // airflow expeected direction. This sets the flaps affect and the
     // stall/extra lift effects.
-    irrvec3 wing_airflow_direction;
+    raylib::Vector3 wing_airflow_direction;
     float stall_angle_min;
     float stall_angle_max;
   };
 
   PointAirFoil(const Params &params) : m_params(params) {}
 
-  void set_flap_normal(const irrvec3 &flap_normal) {
+  void set_flap_normal(const raylib::Vector3 &flap_normal) {
     m_flap_normal = flap_normal;
   };
-  AppliedForce get_force(const irrvec3 &airflow);
-  const irrvec3 &get_position() const { return m_params.position_in_airplane; }
+  AppliedForce get_force(const raylib::Vector3 &airflow);
+  const raylib::Vector3 &get_position() const {
+    return m_params.position_in_airplane;
+  }
 
   void init_ui(irr::scene::ISceneManager *smgr,
                irr::video::IVideoDriver *driver,
@@ -55,10 +57,10 @@ public:
 
 private:
   Params m_params;
-  irrvec3 m_flap_normal;
+  raylib::Vector3 m_flap_normal;
 
   // Needed to save calculation.
-  irrvec3 m_along_wing_direction;
+  raylib::Vector3 m_along_wing_direction;
 
   std::shared_ptr<Arrow> m_force_arrow = nullptr;
 };
@@ -85,8 +87,8 @@ public:
     float x_length;
     float z_width;
     float y_thickness;
-    irrvec3 rotation_angles;
-    irrvec3 position_in_airplane;
+    raylib::Vector3 rotation_angles;
+    raylib::Vector3 position_in_airplane;
     int num_points;
 
     // Aerodynamic params:
@@ -105,9 +107,10 @@ public:
 
   RectangularAirFoil(const Params &params);
 
-  std::vector<AppliedForce> calc_force(const irrvec3 &wind_in_airplane,
-                                       const irrvec3 &velocity_in_airplane,
-                                       const irrvec3 &omega_in_airplane);
+  std::vector<AppliedForce>
+  calc_force(const raylib::Vector3 &wind_in_airplane,
+             const raylib::Vector3 &velocity_in_airplane,
+             const raylib::Vector3 &omega_in_airplane);
 
   void set_flap(float value);
 
@@ -119,23 +122,23 @@ public:
 private:
   std::vector<std::shared_ptr<PointAirFoil>> m_point_airfoils;
   Params m_params;
-  irrvec3 m_along_wing_direction;
-  irrvec3 m_wing_normal;
+  raylib::Vector3 m_along_wing_direction;
+  raylib::Vector3 m_wing_normal;
 };
 
 class Propellant {
 public:
   struct Params {
-    irrvec3 direction_in_airplane;
-    irrvec3 position_in_airplane;
+    raylib::Vector3 direction_in_airplane;
+    raylib::Vector3 position_in_airplane;
     float thrust_airspeed;
     float max_thrust;
   };
 
   Propellant(const Params &params) : m_params(params) {}
 
-  AppliedForce calc_force(const irrvec3 &wind_in_airplane,
-                          const irrvec3 &velocity_in_airplane);
+  AppliedForce calc_force(const raylib::Vector3 &wind_in_airplane,
+                          const raylib::Vector3 &velocity_in_airplane);
 
   void set_throttle(float throttle) { m_throttle = 0.5f + throttle / 2.0f; }
 
@@ -154,7 +157,7 @@ class Airplane : public FlyingObject {
 public:
   struct Params {
     float mass;
-    irrvec3 moi;
+    raylib::Vector3 moi;
     std::vector<RectangularAirFoil::Params> airfoils;
     std::map<int, int> channel_flap_mapping;
     std::vector<Propellant::Params> propellants;
@@ -174,9 +177,9 @@ public:
     std::vector<float> servo_init_values;
 
     // Initial parameters.
-    irrvec3 init_position;
-    irrvec3 init_velocity;
-    irrvec3 init_rotation;
+    raylib::Vector3 init_position;
+    raylib::Vector3 init_velocity;
+    raylib::Vector3 init_rotation;
 
     // Debug shape.
     bool show_skeleton = true;
@@ -186,18 +189,19 @@ public:
            irr::video::IVideoDriver *driver);
 
   virtual ServoFilter &get_servo(int channel) { return m_servos[channel]; }
-  virtual void update(double time_delta, const irrvec3 &wind_speed);
-  virtual void add_force(unsigned int touchpoints_index, const irrvec3 &force);
+  virtual void update(double time_delta, const raylib::Vector3 &wind_speed);
+  virtual void add_force(unsigned int touchpoints_index,
+                         const raylib::Vector3 &force);
   virtual void reset_force();
 
   virtual std::vector<TouchPoint> get_touchpoints_in_world() const;
   virtual double get_mass() const { return m_params.mass; }
-  virtual irrvec3 get_position() const { return m_position_in_world; }
-  virtual void set_position(const irrvec3 new_pos) {
+  virtual raylib::Vector3 get_position() const { return m_position_in_world; }
+  virtual void set_position(const raylib::Vector3 new_pos) {
     m_position_in_world = new_pos;
   }
-  virtual irrvec3 get_velocity() const { return m_velocity_in_world; }
-  virtual void set_velocity(const irrvec3 new_v) {
+  virtual raylib::Vector3 get_velocity() const { return m_velocity_in_world; }
+  virtual void set_velocity(const raylib::Vector3 new_v) {
     m_velocity_in_world = new_v;
   }
 
@@ -209,17 +213,17 @@ protected:
                irr::video::IVideoDriver *driver);
   virtual void update_ui();
 
-  irrvec3 m_position_in_world;
-  irrvec3 m_velocity_in_world;
-  irrvec3 m_angular_velocity_in_airplane;
+  raylib::Vector3 m_position_in_world;
+  raylib::Vector3 m_velocity_in_world;
+  raylib::Vector3 m_angular_velocity_in_airplane;
   irrmat4 m_rotation_in_world;
 
   // UI node
   irr::scene::ISceneNode *m_ui_node;
 
   // External forces and torques.
-  irrvec3 m_external_force_in_world;
-  irrvec3 m_external_torque_in_airplane;
+  raylib::Vector3 m_external_force_in_world;
+  raylib::Vector3 m_external_torque_in_airplane;
 
   std::vector<std::shared_ptr<RectangularAirFoil>> m_airfoils;
   std::vector<std::shared_ptr<Propellant>> m_propellants;

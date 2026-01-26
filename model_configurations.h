@@ -4,8 +4,8 @@
 #include "controls.h"
 #include "dashboard.h"
 #include "flying_object.h"
-#include <irrlicht/irrlicht.h>
 #include <memory>
+#include <raylib.hpp>
 
 struct Configuration {
   std::shared_ptr<FlyingObject> model;

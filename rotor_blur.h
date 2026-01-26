@@ -1,14 +1,14 @@
 #ifndef __ROTOR_BLUR_H__
 #define __ROTOR_BLUR_H__
 
-#include <irrlicht/irrlicht.h>
-typedef irr::core::vector3df irrvec3;
+#include <raylib.hpp>
+typedef irr::core::vector3df raylib::Vector3;
 
 class RotorBlur {
 public:
-  void init_ui(irr::scene::ISceneManager *smgr, float radius, irrvec3 position,
-               irrvec3 rotation, float thickness,
-               irr::scene::IMeshSceneNode *parent_node);
+  void init_ui(irr::scene::ISceneManager *smgr, float radius,
+               raylib::Vector3 position, raylib::Vector3 rotation,
+               float thickness, irr::scene::IMeshSceneNode *parent_node);
 
 private:
   // Methods to be overriden by decendents.

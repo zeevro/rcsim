@@ -2,7 +2,7 @@
 #define __INTPUT_EVENT_RECIEVER_H__
 
 #include "controls.h"
-#include <irrlicht/irrlicht.h>
+#include <raylib.hpp>
 
 struct UserInput {
   ControlsInput controls_input;
@@ -35,7 +35,6 @@ private:
   // We use this array to store the current state of each key
   bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
 
-  bool m_use_joystick;
   irr::SEvent::SJoystickEvent JoystickState;
   bool m_joystick_active;
   UserInput m_user_input;

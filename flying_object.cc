@@ -18,12 +18,12 @@ float ServoFilter::update(float value, float time_delta) {
 }
 
 void update_rotation_matrix(irr::core::matrix4 &matrix,
-                            const irrvec3 angularv) {
+                            const raylib::Vector3 angularv) {
 
   // Extract rotation columns.
-  irrvec3 x(matrix(0, 0), matrix(0, 1), matrix(0, 2));
-  irrvec3 y(matrix(1, 0), matrix(1, 1), matrix(1, 2));
-  irrvec3 z(matrix(2, 0), matrix(2, 1), matrix(2, 2));
+  raylib::Vector3 x(matrix(0, 0), matrix(0, 1), matrix(0, 2));
+  raylib::Vector3 y(matrix(1, 0), matrix(1, 1), matrix(1, 2));
+  raylib::Vector3 z(matrix(2, 0), matrix(2, 1), matrix(2, 2));
 
   // Perform the inifinitisimal rotation.
   x += angularv.crossProduct(x);

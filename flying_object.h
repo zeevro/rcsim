@@ -1,10 +1,10 @@
 #ifndef __FLYING_OBJ__
 #define __FLYING_OBJ__
 
-#include <irrlicht/irrlicht.h>
+#include <raylib.hpp>
 #include <vector>
 
-typedef irr::core::vector3df irrvec3;
+typedef irr::core::vector3df raylib::Vector3;
 typedef irr::core::matrix4 irrmat4;
 
 static inline irrmat4 diag2(float x, float z) {
@@ -16,7 +16,8 @@ static inline irrmat4 diag2(float x, float z) {
 }
 
 /** A helper function for inifinitisimal update of rotation matrix. */
-void update_rotation_matrix(irr::core::matrix4 &matrix, const irrvec3 angularv);
+void update_rotation_matrix(irr::core::matrix4 &matrix,
+                            const raylib::Vector3 angularv);
 
 class ServoFilter {
 public:
@@ -35,14 +36,14 @@ private:
 class FlyingObject {
 public:
   virtual ServoFilter &get_servo(int channel) = 0;
-  virtual void update(double time_delta, const irrvec3 &wind_speed) = 0;
+  virtual void update(double time_delta, const raylib::Vector3 &wind_speed) = 0;
   virtual void add_force(unsigned int touchpoints_index,
-                         const irrvec3 &force) = 0;
+                         const raylib::Vector3 &force) = 0;
   virtual void reset_force() = 0;
 
   struct TouchPoint {
-    irrvec3 pos;
-    irrvec3 vel;
+    raylib::Vector3 pos;
+    raylib::Vector3 vel;
     irrmat4 friction_coeff; // A symmetric matrix indicating the friction
                             // coefficient in (x, z) direction. The Y direction
                             // isn't used.
@@ -50,10 +51,10 @@ public:
 
   virtual std::vector<TouchPoint> get_touchpoints_in_world() const = 0;
   virtual double get_mass() const = 0;
-  virtual irrvec3 get_position() const = 0;
-  virtual void set_position(const irrvec3 new_pos) = 0;
-  virtual irrvec3 get_velocity() const = 0;
-  virtual void set_velocity(const irrvec3 new_v) = 0;
+  virtual raylib::Vector3 get_position() const = 0;
+  virtual void set_position(const raylib::Vector3 new_pos) = 0;
+  virtual raylib::Vector3 get_velocity() const = 0;
+  virtual void set_velocity(const raylib::Vector3 new_v) = 0;
 
   // For telemetry.
   struct Telemetry {
