@@ -1,3 +1,8 @@
+CC      = $(CROSS_COMPILE)gcc
+CXX     = $(CROSS_COMPILE)g++
+LD      = $(CROSS_COMPILE)ld
+OBJCOPY = $(CROSS_COMPILE)objcopy
+
 CXXFLAGS = -O3 -Wall -Werror -g
 LDFLAGS = -rdynamic -g
 
