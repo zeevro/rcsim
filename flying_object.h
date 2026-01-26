@@ -7,7 +7,6 @@
 typedef irr::core::vector3df irrvec3;
 typedef irr::core::matrix4 irrmat4;
 
-
 static inline irrmat4 diag2(float x, float z) {
   irrmat4 mat;
   mat(0, 0) = x;
@@ -15,7 +14,6 @@ static inline irrmat4 diag2(float x, float z) {
   mat(2, 2) = z;
   return mat;
 }
-
 
 /** A helper function for inifinitisimal update of rotation matrix. */
 void update_rotation_matrix(irr::core::matrix4 &matrix, const irrvec3 angularv);

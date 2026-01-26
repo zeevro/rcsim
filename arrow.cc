@@ -2,9 +2,7 @@
 #include "arrow.h"
 #include <iostream>
 
-Arrow::Arrow(irr::scene::ISceneManager *smgr, 
-             irr::scene::ISceneNode *parent)
-{
+Arrow::Arrow(irr::scene::ISceneManager *smgr, irr::scene::ISceneNode *parent) {
   m_node = smgr->addEmptySceneNode(parent);
 
   irr::scene::ISceneNode *arrow_node = smgr->addAnimatedMeshSceneNode(

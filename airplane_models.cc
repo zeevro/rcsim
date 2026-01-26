@@ -286,7 +286,8 @@ Trainer::Trainer(irr::scene::ISceneManager *smgr,
                   },
               .touchpoint_to_channel_mapping =
                   {
-                      {0, {.servo_index = AIRPLANE_CHANNEL_YAW, .max_angle = 45}},
+                      {0,
+                       {.servo_index = AIRPLANE_CHANNEL_YAW, .max_angle = 45}},
                   },
               .servo_max_rps = {1, 3, 3, 3, 3, 3},
               .servo_init_values = {-1, 0, 0, 0, 0, 0},

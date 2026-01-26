@@ -385,7 +385,8 @@ std::vector<Airplane::TouchPoint> Airplane::get_touchpoints_in_world() const {
     if (m_params.touchpoint_to_channel_mapping.find(tp_index) !=
         m_params.touchpoint_to_channel_mapping.end()) {
       auto wheel_conf = m_params.touchpoint_to_channel_mapping.at(tp_index);
-      float angle = m_servos[wheel_conf.servo_index].get() * wheel_conf.max_angle;
+      float angle =
+          m_servos[wheel_conf.servo_index].get() * wheel_conf.max_angle;
       irrmat4 wheel_rot;
       wheel_rot.setRotationDegrees(irrvec3(0, -angle, 0));
       friction_in_body =
