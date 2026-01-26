@@ -53,11 +53,10 @@ Configuration create_rc_glider(irr::video::IVideoDriver *driver,
       std::make_shared<SimpleGlider>(smgr, driver);
   std::shared_ptr<AirplaneControls> controls =
       std::make_shared<AirplaneControls>(true);
-  std::shared_ptr<Dashboard> dashboard = std::make_shared<PlaneDashboard>(
-      driver, 20);
-  return Configuration{.model = airplane,
-                       .controls = controls,
-                       .dashboard = dashboard};
+  std::shared_ptr<Dashboard> dashboard =
+      std::make_shared<PlaneDashboard>(driver, 20);
+  return Configuration{
+      .model = airplane, .controls = controls, .dashboard = dashboard};
 }
 
 Configuration create_rc_trainer(irr::video::IVideoDriver *driver,
@@ -66,11 +65,10 @@ Configuration create_rc_trainer(irr::video::IVideoDriver *driver,
       std::make_shared<Trainer>(smgr, driver);
   std::shared_ptr<AirplaneControls> controls =
       std::make_shared<AirplaneControls>(true);
-  std::shared_ptr<Dashboard> dashboard = std::make_shared<PlaneDashboard>(
-      driver, 30);
-  return Configuration{.model = airplane,
-                       .controls = controls,
-                       .dashboard = dashboard};
+  std::shared_ptr<Dashboard> dashboard =
+      std::make_shared<PlaneDashboard>(driver, 30);
+  return Configuration{
+      .model = airplane, .controls = controls, .dashboard = dashboard};
 }
 
 std::vector<ModelConfiguration> MODEL_CONFIGURATIONS = {

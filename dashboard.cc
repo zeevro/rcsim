@@ -350,11 +350,11 @@ void VerticalControlsInstrument::update(float pin1, float pin2) {
                         irr::core::rect<int>(0, 0, m_width, m_height), NULL,
                         irr::video::SColor(255, 255, 255, 255), true);
 
-  m_driver->draw2DImage(m_pin_image,
-                        irr::core::rect<int>(pin2_x, pin2_y, pin2_x + PIN_SIZE*2,
-                                             pin2_y + PIN_SIZE),
-                        irr::core::rect<int>(0, 0, PIN_SIZE, PIN_SIZE), NULL,
-                        NULL, true);
+  m_driver->draw2DImage(
+      m_pin_image,
+      irr::core::rect<int>(pin2_x, pin2_y, pin2_x + PIN_SIZE * 2,
+                           pin2_y + PIN_SIZE),
+      irr::core::rect<int>(0, 0, PIN_SIZE, PIN_SIZE), NULL, NULL, true);
 
   m_driver->draw2DImage(m_second_pin_image,
                         irr::core::rect<int>(pin1_x, pin1_y, pin1_x + PIN_SIZE,
@@ -732,5 +732,6 @@ void PlaneDashboard::update_ui(const Controls::Telemetry &controls_telemetry,
 
   m_yaw_instrument.update(before_controller[3], after_controller[3]);
   m_throttle_instrument.update(before_controller[0], after_controller[0]);
-  m_airspeed_instrument.update(telemetry.airspeed, telemetry.velocity_magnitude);
+  m_airspeed_instrument.update(telemetry.airspeed,
+                               telemetry.velocity_magnitude);
 }

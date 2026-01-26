@@ -7,7 +7,8 @@ typedef irr::core::vector3df irrvec3;
 
 class Arrow {
 public:
-  Arrow(irr::scene::ISceneManager *smgr, irr::scene::ISceneNode *parent = nullptr);
+  Arrow(irr::scene::ISceneManager *smgr,
+        irr::scene::ISceneNode *parent = nullptr);
 
   void point(const irrvec3 &at);
 

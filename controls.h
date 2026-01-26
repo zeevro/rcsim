@@ -1,9 +1,9 @@
 #ifndef __CONTROLS_H__
 #define __CONTROLS_H__
 
+#include "airplane.h"
 #include "flight_controller.h"
 #include "heli.h"
-#include "airplane.h"
 #include <memory>
 #include <vector>
 
@@ -77,7 +77,7 @@ private:
 
 class AirplaneControls : public Controls {
 public:
-  AirplaneControls(bool use_flapron): m_use_flapron(use_flapron) {}
+  AirplaneControls(bool use_flapron) : m_use_flapron(use_flapron) {}
 
   virtual ServoData get_servo_data(const ControlsInput &input,
                                    float time_delta) override;

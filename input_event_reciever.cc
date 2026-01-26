@@ -41,7 +41,8 @@ bool EventReceiver::OnEvent(const irr::SEvent &event) {
 
     if (event.KeyInput.Key == KEY_KEY_J && event.KeyInput.PressedDown) {
       m_use_joystick = !m_use_joystick;
-      if (!m_use_joystick) m_joystick_active = false;
+      if (!m_use_joystick)
+        m_joystick_active = false;
     }
   }
 

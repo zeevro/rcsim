@@ -10,9 +10,9 @@ HeliFlightController::translate(const std::vector<float> &servo_data,
   // If the throttle is low, set all the servos to 0.
   if (servo_data[HELI_CHANNEL_THROTTLE] < -0.7) {
     std::vector<float> zero_servo_data = servo_data;
-    for (float &x : zero_servo_data) x = 0;
-    zero_servo_data[HELI_CHANNEL_THROTTLE] =
-        servo_data[HELI_CHANNEL_THROTTLE];
+    for (float &x : zero_servo_data)
+      x = 0;
+    zero_servo_data[HELI_CHANNEL_THROTTLE] = servo_data[HELI_CHANNEL_THROTTLE];
     return zero_servo_data;
   }
 

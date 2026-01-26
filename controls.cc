@@ -86,8 +86,8 @@ Controls::Telemetry HeliControls::get_telemetry() {
 // AirplaneControls methods.
 ////////////////////////////////////////////////////////////////////////////////
 
-ServoData AirplaneControls::get_servo_data(
-    const ControlsInput &input, float time_delta) {
+ServoData AirplaneControls::get_servo_data(const ControlsInput &input,
+                                           float time_delta) {
   ServoData servo_data(6);
   servo_data[AIRPLANE_CHANNEL_THROTTLE] = input.throttle_stick;
   servo_data[AIRPLANE_CHANNEL_PITCH] = -input.pitch_stick;
@@ -109,7 +109,7 @@ ServoData AirplaneControls::get_servo_data(
   m_output_servo_data = servo_data;
   return servo_data;
 }
-  
+
 Controls::Telemetry AirplaneControls::get_telemetry() {
   Controls::Telemetry telemetry;
   telemetry.user_input = m_user_input;

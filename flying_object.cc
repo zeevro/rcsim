@@ -49,4 +49,3 @@ void update_rotation_matrix(irr::core::matrix4 &matrix,
   matrix(2, 1) = z.Y;
   matrix(2, 2) = z.Z;
 }
-
