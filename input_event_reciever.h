@@ -35,6 +35,7 @@ private:
   // We use this array to store the current state of each key
   bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
 
+  bool m_use_joystick;
   irr::SEvent::SJoystickEvent JoystickState;
   bool m_joystick_active;
   UserInput m_user_input;
